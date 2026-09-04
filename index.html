@@ -364,8 +364,15 @@
     <p>the words i wish i said.</p>
   </footer>
 
+  
   <script>
-    const textarea = document.getElementById("message");
+   const SUPABASE_URL = 'https://wwxcqrqijpjunzmyakfb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_mbW8B5O2pXFAYwgA7Zg4DQ_Y7I1SxE4';
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+); const textarea = document.getElementById("message");
     const counter = document.getElementById("counter");
     const form = document.getElementById("messageForm");
     const messagesContainer = document.getElementById("messages");
@@ -382,29 +389,38 @@
       counter.textContent = `${textarea.value.length} / 1000`;
     });
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    
+    form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-      const text = textarea.value.trim();
+  const text = textarea.value.trim();
 
-      if (!text) return;
+  if (!text) return;
 
-      messages.unshift(text);
+  const { data, error } = await supabaseClient
+    .from("messages")
+    .insert([{ text }]);
 
-      const card = document.createElement("article");
-      card.className = "message-card";
+  if (error) {
+    alert("something went wrong. please try again.");
+    console.error(error);
+    return;
+  }
 
-      const paragraph = document.createElement("p");
-      paragraph.textContent = text;
+  const card = document.createElement("article");
+  card.className = "message-card";
 
-      card.appendChild(paragraph);
-      messagesContainer.prepend(card);
+  const paragraph = document.createElement("p");
+  paragraph.textContent = text;
 
-      textarea.value = "";
-      counter.textContent = "0 / 1000";
+  card.appendChild(paragraph);
+  messagesContainer.prepend(card);
 
-      alert("your words have been left here.");
-    });
+  textarea.value = "";
+  counter.textContent = "0 / 1000";
+
+  alert("your words have been left here.");
+});
 
     randomButton.addEventListener("click", () => {
       const randomIndex = Math.floor(Math.random() * messages.length);
